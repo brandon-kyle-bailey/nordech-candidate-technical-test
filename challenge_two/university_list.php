@@ -1,6 +1,9 @@
 <?php 
+	
+	
 	include_once 'university.php';
 
 	$university = new University();
-	$university->insert();
+	$university->addUniversity(); // addUniversity($country, $name, $domain);
+	
 ?> 
