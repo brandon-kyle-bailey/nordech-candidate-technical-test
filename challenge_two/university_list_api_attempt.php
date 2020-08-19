@@ -13,8 +13,8 @@
 		'http://universities.hipolabs.com/search?country=United States'
 	);
 	
-	sdfsdfs
-	$json = json_decode($response->getBody()->getContents());
+	//..
+		$json = json_decode($response->getBody()->getContents());
 	
 	//var_dump($json[0]->name);
 	
