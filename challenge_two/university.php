@@ -22,8 +22,17 @@ try {
     {
         $this->connection = $pdo;
     }
+    
+    public function addUniversity($country, $name, $domain){
+    $query = "INSERT INTO `universities` (`uni_country`, `uni_name`, `uni_domain`)"
+         ."VALUES ($country, $name, $domain);
+         
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$setValue, $searchValue]);
+    return $stmt->rowCount();	    
+    }
 
-    public function getUniversity($id)
+    public function getUniversity()
     {
         $sql = 'SELECT * FROM universities';
         $result = $this->connection->query($sql);
