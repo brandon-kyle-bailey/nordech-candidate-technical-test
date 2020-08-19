@@ -29,15 +29,11 @@ function updateTable($pdo, $updateTable, $setKey, $setValue, $searchKey, $search
 
 }
 
-function userStillLockedOut(){
-	         $_SESSION['login_success'] = false;
-            $_SESSION['user_found'] = true;
-            return 7;
-}
-
+//Suggestion: Divide user access code into authentication and authorization. This way we do not need to run authorization code for all users. 
 
 function doLogin($pdo) {
 $givenUser = getGivenUser($pdo);
+
         if(!$givenUser) {
             // no user found?
             $_SESSION['login_success'] = false;
