@@ -11,6 +11,8 @@ try {
 } catch(\PDOException $e) {
     throw new \PDOException($e->getMessage(), (int)$e->getCode());
 };
+
+
 function getGivenUser($pdo) {
     // query database
     $query = 'SELECT * FROM Users WHERE email=:email LIMIT 1';
@@ -18,6 +20,7 @@ function getGivenUser($pdo) {
     $stmt->execute([$_POST['email']]);
     return $stmt->fetch();
 }
+
 function updateTable($pdo, $updateTable, $setKey, $setValue, $searchKey, $searchValue) {
     $query = "UPDATE $updateTable SET $setKey=:setValue WHERE $searchKey=:searchValue";
     $stmt = $pdo->prepare($query);
@@ -25,6 +28,7 @@ function updateTable($pdo, $updateTable, $setKey, $setValue, $searchKey, $search
     return $stmt->rowCount();
 
 }
+
 function doLogin($pdo) {
         $givenUser = getGivenUser($pdo);
         if(!$givenUser) {
@@ -65,6 +69,8 @@ function doLogin($pdo) {
         $_SESSION['user_found'] = true;
         return 2;      
 }
+
+
 function doFailedLoginUpdate($pdo) {
     $givenUser = getGivenUser($pdo);
     if($givenUser['loginAttempts'] <= 2) {
@@ -78,6 +84,7 @@ function doFailedLoginUpdate($pdo) {
 }
 $loginCode = doLogin($pdo);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
