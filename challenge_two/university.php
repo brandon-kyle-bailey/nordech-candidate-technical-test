@@ -25,7 +25,7 @@ try {
     
     public function addUniversity($country, $name, $domain){
     $query = "INSERT INTO `universities` (`uni_country`, `uni_name`, `uni_domain`)"
-         ."VALUES ($country, $name, $domain);
+         ."VALUES ($country, $name, $domain)";
          
     $stmt = $pdo->prepare($query);
     $stmt->execute([$setValue, $searchValue]);
