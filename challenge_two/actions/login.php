@@ -2,7 +2,7 @@
 session_start();
 // connect to database
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=nordech_challenge", "USERNAME", "PASSWORD", [
+    $pdo = new PDO("mysql:host=127.0.0.1;dbname=nordech_challenge", "root", "Gherve2016", [
                         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                         PDO::ATTR_EMULATE_PREPARES => false,
@@ -29,20 +29,40 @@ function updateTable($pdo, $updateTable, $setKey, $setValue, $searchKey, $search
 
 }
 
+function userStillLockedOut(){
+	         $_SESSION['login_success'] = false;
+            $_SESSION['user_found'] = true;
+            return 7;
+}
+
+
 function doLogin($pdo) {
-        $givenUser = getGivenUser($pdo);
+$givenUser = getGivenUser($pdo);
         if(!$givenUser) {
             // no user found?
             $_SESSION['login_success'] = false;
             $_SESSION['user_found'] = false;
             return 4;
         }
+        
+        // authorizing based on password alone
         if($givenUser['password']!==$_POST['psw']) {
             // do passwords match?
             $_SESSION['login_success'] = false;
             $_SESSION['user_found'] = true;
             return 5;
+        } else {
+	    // all cases success, reset login attempts and remove lockout time.
+        updateTable($pdo, "Users", "loginAttempts", 0, "ID", $givenUser['ID']);
+        updateTable($pdo, "Users", "lockedOut", 0, "ID", $givenUser['ID']);
+        updateTable($pdo, "Users", "lockedoutUntil", NULL, "ID", $givenUser['ID']);
+        $_SESSION['login_success'] = true;
+        $_SESSION['user_found'] = true;
+        return 2; 
         }
+        
+        
+/*
         if($givenUser['passwordExpire'] < date("Y-m-d H:i:s")) {
             // Has the password expired?
             $_SESSION['login_success'] = false;
@@ -61,13 +81,8 @@ function doLogin($pdo) {
             $_SESSION['user_found'] = true;
             return 8;
         }
-        // all cases success, reset login attempts and remove lockout time.
-        updateTable($pdo, "Users", "loginAttempts", 0, "ID", $givenUser['ID']);
-        updateTable($pdo, "Users", "lockedOut", 0, "ID", $givenUser['ID']);
-        updateTable($pdo, "Users", "lockedoutUntil", NULL, "ID", $givenUser['ID']);
-        $_SESSION['login_success'] = true;
-        $_SESSION['user_found'] = true;
-        return 2;      
+*/
+            
 }
 
 
