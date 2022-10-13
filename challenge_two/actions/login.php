@@ -2,7 +2,7 @@
 session_start();
 // connect to database
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=nordech_challenge", "USERNAME", "PASSWORD", [
+    $pdo = new PDO("mysql:host=127.0.0.1;dbname=nordech_challenge", "root", "Gherve2016", [
                         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                         PDO::ATTR_EMULATE_PREPARES => false,
@@ -11,6 +11,8 @@ try {
 } catch(\PDOException $e) {
     throw new \PDOException($e->getMessage(), (int)$e->getCode());
 };
+
+
 function getGivenUser($pdo) {
     // query database
     $query = 'SELECT * FROM Users WHERE email=:email LIMIT 1';
@@ -18,6 +20,7 @@ function getGivenUser($pdo) {
     $stmt->execute([$_POST['email']]);
     return $stmt->fetch();
 }
+
 function updateTable($pdo, $updateTable, $setKey, $setValue, $searchKey, $searchValue) {
     $query = "UPDATE $updateTable SET $setKey=:setValue WHERE $searchKey=:searchValue";
     $stmt = $pdo->prepare($query);
@@ -25,20 +28,37 @@ function updateTable($pdo, $updateTable, $setKey, $setValue, $searchKey, $search
     return $stmt->rowCount();
 
 }
+
+//Suggestion: Divide user access code into authentication and authorization. This way we do not need to run authorization code for all users. 
+
 function doLogin($pdo) {
-        $givenUser = getGivenUser($pdo);
+$givenUser = getGivenUser($pdo);
+
         if(!$givenUser) {
             // no user found?
             $_SESSION['login_success'] = false;
             $_SESSION['user_found'] = false;
             return 4;
         }
+        
+        // authorizing based on password alone
         if($givenUser['password']!==$_POST['psw']) {
             // do passwords match?
             $_SESSION['login_success'] = false;
             $_SESSION['user_found'] = true;
             return 5;
+        } else {
+	    // all cases success, reset login attempts and remove lockout time.
+        updateTable($pdo, "Users", "loginAttempts", 0, "ID", $givenUser['ID']);
+        updateTable($pdo, "Users", "lockedOut", 0, "ID", $givenUser['ID']);
+        updateTable($pdo, "Users", "lockedoutUntil", NULL, "ID", $givenUser['ID']);
+        $_SESSION['login_success'] = true;
+        $_SESSION['user_found'] = true;
+        return 2; 
         }
+        
+        
+/*
         if($givenUser['passwordExpire'] < date("Y-m-d H:i:s")) {
             // Has the password expired?
             $_SESSION['login_success'] = false;
@@ -57,14 +77,11 @@ function doLogin($pdo) {
             $_SESSION['user_found'] = true;
             return 8;
         }
-        // all cases success, reset login attempts and remove lockout time.
-        updateTable($pdo, "Users", "loginAttempts", 0, "ID", $givenUser['ID']);
-        updateTable($pdo, "Users", "lockedOut", 0, "ID", $givenUser['ID']);
-        updateTable($pdo, "Users", "lockedoutUntil", NULL, "ID", $givenUser['ID']);
-        $_SESSION['login_success'] = true;
-        $_SESSION['user_found'] = true;
-        return 2;      
+*/
+            
 }
+
+
 function doFailedLoginUpdate($pdo) {
     $givenUser = getGivenUser($pdo);
     if($givenUser['loginAttempts'] <= 2) {
@@ -78,6 +95,7 @@ function doFailedLoginUpdate($pdo) {
 }
 $loginCode = doLogin($pdo);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
